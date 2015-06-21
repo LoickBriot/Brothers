@@ -3,7 +3,7 @@ physics_center_y  = 0
 physics_size_x    = 13
 physics_size_y    = 13
 physics_can_sleep = true
-physics_rotation  = false
+physics_rotation  = true
 
 addanim('Canon_met_D.png',37)
 playanim('Canon_met_D.png',false)

@@ -3,7 +3,7 @@ physics_center_y  =  0
 physics_size_x    = 12
 physics_size_y    = 16
 physics_can_sleep = false
-physics_rotation  = true
+physics_rotation  = false
 
 addanim('runspritegauche.png',32)
 addanim('runspritedroite.png',32)
@@ -21,6 +21,7 @@ stopanim()
 -- 'turn_left', 'turn_right'
 
 state = 'wait_left'
+fireball = 'true'
 
 function step()
 
@@ -60,33 +61,83 @@ function step()
   end
 
   if Key_l then
-	if state == 'walk_left' or state == 'turn_left' or state == 'wait_left' then
-		attack(1, 0)
-    else
-		attack(1, 1)
+    if fireball == 'true' then
+		if state == 'walk_left' or state == 'turn_left' or state == 'wait_left' then
+			attack(1, pos_x, pos_y, 0)
+		else
+			attack(1, pos_x, pos_y, 1)
+		end
+		fireball = 'false'
     end
   end
 
+  if fireball == 'false' then
+	evolution = evolution + 1
+  end
+
+  if evolution >= 50 then
+	evolution = 0
+	fireball = 'true'
+  end	
+
 
   if Key_n and Key_p then
-    set_jump(0,4,1.5,3.5,0,0)
+    set_jump(0,3.3,1.5,3.5,0,0)
 
 
   elseif Key_n and Key_k then
 
-    set_jump(0,4,0,0,-1.5,3.5)
+    set_jump(0,3.3,0,0,-1.5,3.5)
 
   elseif Key_n then
-  	set_jump(0,4,0,0,0,0)
+  	set_jump(0,3.3,0,0,0,0)
   end
 
   -- walk if state is 'walk_*'
 
-  if state == 'walk_left' then
-    set_walk(-2., -60)
+  if isSlower == true then
+	
+	if evolution2 < 500 then
+		if state == 'walk_left' then
+		   set_walk(-1.2, -60)
 
-  elseif state == 'walk_right' then
-    set_walk(2, 60)
+	    elseif state == 'walk_right' then
+		   set_walk(1.2, 60)
+		end
+		evolution2 = evolution2 + 1
+    end
+	if evolution2 == 500 then
+		isSlower = false
+		evolution2 = 0
+    end
+
+  end
+
+  if isFaster == true then
+	
+	if evolution2 < 500 then
+		if state == 'walk_left' then
+		   set_walk(-4., -60)
+
+	    elseif state == 'walk_right' then
+		   set_walk(4, 60)
+		end
+		evolution2 = evolution2 + 1
+    end
+	if evolution2 == 500 then
+		isFaster = false
+		evolution2 = 0
+    end
+
+  end
+
+  if isFaster == false and isSlower == false then
+	 if state == 'walk_left' then
+	   set_walk(-2., -60)
+
+	 elseif state == 'walk_right' then
+	   set_walk(2, 60)
+	 end
   end
 
 set_correction(0.003,0.01)

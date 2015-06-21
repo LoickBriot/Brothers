@@ -11,7 +11,8 @@ tile(rborder, 'tile_ice.png', 0,0, 18,16 )
 tile(color(0,0,255), 'area01_level_tiles.png', 176,0, 32,32 )
 
 -- load tile map
-tilemap('map0.png',16,16)
+chosenMap = math.random(0,3)
+tilemap('map' .. chosenMap .. '.png',16,16)
 
 -- automatically add borders
 for j=0,num_tiles_y()-1 do
@@ -40,7 +41,6 @@ for j=0,num_tiles_y()-1 do
 		create_ennemies(i, j, 4)
     end
 	if tileat(i,j) == color(239, 228, 176) then
-	    print('a')
 		create_ennemies(i, j, 5)
     end
 	if tileat(i,j) == color(255, 201, 14) then

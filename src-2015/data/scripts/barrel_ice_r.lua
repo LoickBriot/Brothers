@@ -12,10 +12,10 @@ function step()
  
     set_velocity_x = 0
 	set_velocity_y = 0
-	if evolution == 200 then
+	if evolution == 300 then
 		throw_fire_ball(pos_x, pos_y, 1)
     end
-	if evolution > 200 then
+	if evolution > 300 then
 		evolution = 0
     end
 	evolution = evolution + 1

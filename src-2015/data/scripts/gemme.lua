@@ -14,7 +14,7 @@ end
 
 function contact(with)
 	if with == 1 then
-		 nbOfDiamonds = (nbOfDiamonds + 1) - math.floor((nbOfDiamonds + 1)/3)*3
+		 nbOfDiamonds = (nbOfDiamonds + 1) - math.floor((nbOfDiamonds + 1)/4)*4
   end 
 end
 
