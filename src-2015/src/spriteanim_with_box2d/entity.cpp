@@ -141,31 +141,59 @@ void lua_set_impulse(float ix, float iy)
 	g_Current->body->ApplyLinearImpulse(g_Current->body->GetMass()* b2Vec2(ix, iy), g_Current->body->GetWorldCenter());
 }
 
+extern int doubleJump1;
+extern int doubleJump2;
+
 void lua_set_jump(float ix_foot, float iy_foot, float ix_left, float iy_left, float ix_right, float iy_right){
 	
-	static t_time tmJump = milliseconds();
-	t_time now = milliseconds();
-	if (now - tmJump > 200) {
-		if ((g_Current->name == "player1"  && numLeftContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numLeftContacts2 > 0 && numFootContacts2 == 0))
-		{
-			lua_set_velocity_x(ix_left);
-			lua_set_velocity_y(iy_left);
+	std::cerr << Console::red << doubleJump1 << Console::gray << std::endl;
+		static t_time tmJump1 = milliseconds();
+		static t_time tmJump2 = milliseconds();
+		t_time now = milliseconds();
+		if ((g_Current->name == "player1" && (now - tmJump1) > 200) || (g_Current->name == "player2" && (now - tmJump2) > 200)) {
+			if ((g_Current->name == "player1"  && numLeftContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numLeftContacts2 > 0 && numFootContacts2 == 0))
+			{
+				lua_set_velocity_x(ix_left);
+				lua_set_velocity_y(iy_left);
+				if (g_Current->name == "player1") doubleJump1=2;
+				if (g_Current->name == "player2") doubleJump2=2;
+
+			}
+			else if ((g_Current->name == "player1" && numRightContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numRightContacts2 > 0 && numFootContacts2 == 0))
+			{
+				lua_set_velocity_x(ix_right);
+				lua_set_velocity_y(iy_right);
+				if (g_Current->name == "player1") doubleJump1 = 2;
+				if (g_Current->name == "player2") doubleJump2 = 2;
+			}
+			
+
+			else if ((g_Current->name == "player1"  && doubleJump1 < 2) || (g_Current->name == "player2"  && doubleJump2++ < 2)){
+
+				if (g_Current->name == "player1" && doubleJump1 == 0) {
+					doubleJump1++;
+					lua_set_velocity_y(iy_foot);
+				}
+				else if (g_Current->name == "player1" && doubleJump1 == 1 ){
+					doubleJump1++;
+					lua_set_velocity_y(iy_foot / 4.0);
+				}
+				else if (g_Current->name == "player2" && doubleJump2 == 0){
+					doubleJump2++;
+					lua_set_velocity_y(iy_foot);
+				}
+				else if (g_Current->name == "player2" && doubleJump2 == 1){
+					doubleJump2++;
+					lua_set_velocity_y(iy_foot / 4.0);
+				}
+				
+
+			}
+			if (g_Current->name == "player1") tmJump1 = now;
+			if (g_Current->name == "player2") tmJump2 = now; 
 
 		}
-		else if ((g_Current->name == "player1" && numRightContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numRightContacts2 > 0 && numFootContacts2 == 0))
-		{
-			lua_set_velocity_x(ix_right);
-			lua_set_velocity_y(iy_right);
-		}
-
-		else if ((g_Current->name == "player1"  && numFootContacts1 > 0) || (g_Current->name == "player2" && numFootContacts2 > 0))
-		{
-			lua_set_velocity_x(ix_foot);
-			lua_set_velocity_y(iy_foot);
-
-		}
-		tmJump = now;
-	}
+	
 }
 
 void lua_set_walk(float ix_vel, float ix_jmp){
@@ -245,6 +273,8 @@ void begin_script_call(Entity *e)
   globals(e->script->lua)["pos_x"] = pos[0];
   globals(e->script->lua)["pos_y"] = pos[1];
   globals(e->script->lua)["evolution"] = e->evolution;
+  globals(e->script->lua)["pos_y"] = pos[1];
+  globals(e->script->lua)["evolution2"] = e->evolution2;
   globals(e->script->lua)["killingContact"] = e->killingContact;
   globals(e->script->lua)["winningContact"] = e->winningContact;
   globals(e->script->lua)["gemContact"] = e->gemContact;
@@ -255,6 +285,9 @@ void begin_script_call(Entity *e)
   globals(e->script->lua)["nbOfStars"] = e->nbOfStars;
   globals(e->script->lua)["nbOfDiamonds"] = e->nbOfDiamonds;
   globals(e->script->lua)["field"] = field;
+  globals(e->script->lua)["isMoving"] = e->isMoving;
+  globals(e->script->lua)["isFaster"] = e->isFaster;
+  globals(e->script->lua)["isSlower"] = e->isSlower;
 }
 
 // ------------------------------------------------------------------
@@ -265,6 +298,7 @@ void end_script_call(Entity *e)
   e->pos[0] = luabind::object_cast<float>(globals(e->script->lua)["pos_x"]);
   e->pos[1] = luabind::object_cast<float>(globals(e->script->lua)["pos_y"]);
   e->evolution = luabind::object_cast<int>(globals(e->script->lua)["evolution"]);
+  e->evolution2 = luabind::object_cast<int>(globals(e->script->lua)["evolution2"]);
   field = luabind::object_cast<int>(globals(e->script->lua)["field"]);
   e->life = luabind::object_cast<int>(globals(e->script->lua)["life"]);
   e->score = luabind::object_cast<int>(globals(e->script->lua)["score"]);
@@ -272,22 +306,39 @@ void end_script_call(Entity *e)
   e->nbOfDiamonds = luabind::object_cast<int>(globals(e->script->lua)["nbOfDiamonds"]);
   e->killingContact = luabind::object_cast<bool>(globals(e->script->lua)["killingContact"]);
   e->gemContact = luabind::object_cast<bool>(globals(e->script->lua)["gemContact"]);
+  e->isMoving = luabind::object_cast<bool>(globals(e->script->lua)["isMoving"]);
+  e->isFaster = luabind::object_cast<bool>(globals(e->script->lua)["isFaster"]);
+  e->isSlower = luabind::object_cast<bool>(globals(e->script->lua)["isSlower"]);
   g_Current = NULL;
 }
 
-extern string ball;
-void lua_attack(float x, float y, int direction){
+extern int whereIsBall0;
+extern int whereIsBall1;
+void lua_attack(int character, float x, float y, int direction){
 	
-	Entity* c = entity_create("ball", 2, ball);
-	if (direction == 0){
-		entity_set_pos(c, v2f(x - 45, y));
-		c->movement = 3;
+	if (character == 0){
+		g_Entities[whereIsBall0]->isMoving = true;
+		if (direction == 0){
+			entity_set_pos(g_Entities[whereIsBall0], v2f(x - 45, y));
+			g_Entities[whereIsBall0]->movement = 3;
+		}
+		else{
+			entity_set_pos(g_Entities[whereIsBall0], v2f(x + 45, y));
+			g_Entities[whereIsBall0]->movement = 4;
+		}
 	}
 	else{
-		entity_set_pos(c, v2f(x + 45, y));
-		c->movement = 4;
+		g_Entities[whereIsBall1]->isMoving = true;
+		if (direction == 0){
+			entity_set_pos(g_Entities[whereIsBall1], v2f(x - 45, y));
+			g_Entities[whereIsBall1]->movement = 3;
+		}
+		else{
+			entity_set_pos(g_Entities[whereIsBall1], v2f(x + 45, y));
+			g_Entities[whereIsBall1]->movement = 4;
+		}
 	}
-	g_Entities.push_back(c);
+	
 
 }
 
@@ -308,6 +359,7 @@ void lua_throw_fire_ball(float x, float y, int direction){
 }
 
 
+
 // ------------------------------------------------------------------
 
 Entity *entity_create(string name, int killer, string script)
@@ -321,6 +373,9 @@ Entity *entity_create(string name, int killer, string script)
   e->killingContact = false;
   e->winningContact = false;
   e->gemContact = false;
+  e->isMoving = false;
+  e->isFaster = false;
+  e->isSlower = false;
   e->killer = killer;
   e->score = 0;
   e->nbOfStars = 0;
@@ -350,6 +405,7 @@ Entity *entity_create(string name, int killer, string script)
   else{
 	  e->evolution = 0;
   }
+  e->evolution2 = 0;
   e->animIsPlaying = false;
 
   /// scripting
@@ -539,21 +595,38 @@ void    entity_draw(Entity *e, v2i viewpos, int decallage)
 	if (e->life == 0) {
 		return;
 	}
+	if (e->isMoving == false && e->name == "ball"){
+		entity_set_pos(e, v2f(-100, -100));
+	}
 
 	if (e->gemContact == true){
 		int effect = rand() % 100;
-		cerr << Console::red << effect << Console::gray << endl;
-		if (effect < 50){
+		
+		if (effect < 25){
 			if (e->name == "player1"){
 				entity_set_pos(g_Entities[1], g_Entities[1]->initialCoordinates);
 			}
 			else{
-				entity_set_pos(g_Entities[0], g_Entities[0]->initialCoordinates);
+				entity_set_pos(e, e->initialCoordinates);
 			}
 		}
-		else{
-			entity_set_pos(e, e->initialCoordinates);
+		else if (effect >= 25 && effect < 50){
+			entity_set_pos(g_Entities[0], g_Entities[0]->initialCoordinates);
 		}
+		
+	  if (effect >= 50 && effect < 75){
+			int character = rand() % 1;
+			g_Entities[character]->evolution2 = 0;
+			g_Entities[character]->isSlower = false;
+			g_Entities[character]->isFaster = true;
+	  }
+	  else{
+		  int character = rand() % 1;
+		  g_Entities[character]->evolution2 = 0;
+		  g_Entities[character]->isFaster = false;
+		  g_Entities[character]->isSlower = true;
+	}
+		
 		e->gemContact = false;
 	}
 	if (e->anims.find(e->currentAnim) == e->anims.end()) {

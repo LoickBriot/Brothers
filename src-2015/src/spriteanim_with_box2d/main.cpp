@@ -77,23 +77,28 @@ int             numRightContacts1 = 0;
 int             numFootContacts2 = 0;
 int             numLeftContacts2 = 0;
 int             numRightContacts2 = 0;
+
+t_time tmSound = milliseconds();
+
+int		doubleJump1 = 0;
+int     doubleJump2 = 0;
 int             star;
-int             five[26] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-int             twelve[12] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+int             five[12] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+int             twelve[8] = { -1, -1, -1, -1, -1, -1, -1, -1};
 int             whereIsTheStar;
 int             whereIsDiamond0;
 int             whereIsDiamond1;
-int             whereIsDiamond2;
-int             whereIsDiamond3;
+int             whereIsBall0;
+int             whereIsBall1;
 bool            isInArray;
 int             field;
 int             lastField;
-string monster;
-string barrel_r;
-string barrel_l;
-string spikes;
-string level;
-string ball;
+string			monster;
+string			barrel_r;
+string			barrel_l;
+string			spikes;
+string			level;
+string			ball;
 
 
 // ------------------------------------------------------------------
@@ -223,9 +228,8 @@ void mainRender()
 		entity_set_pos(g_Entities[whereIsTheStar], g_Stars2[five[g_Entities[whereIsTheStar]->nbOfStars]]);
 
 		entity_set_pos(g_Entities[whereIsDiamond0], g_Gems2[twelve[g_Entities[whereIsDiamond0]->nbOfDiamonds]]);
-		entity_set_pos(g_Entities[whereIsDiamond1], g_Gems2[twelve[g_Entities[whereIsDiamond1]->nbOfDiamonds + 3]]);
-		entity_set_pos(g_Entities[whereIsDiamond2], g_Gems2[twelve[g_Entities[whereIsDiamond2]->nbOfDiamonds + 6]]);
-		entity_set_pos(g_Entities[whereIsDiamond3], g_Gems2[twelve[g_Entities[whereIsDiamond3]->nbOfDiamonds + 9]]);
+		entity_set_pos(g_Entities[whereIsDiamond1], g_Gems2[twelve[g_Entities[whereIsDiamond1]->nbOfDiamonds + 4]]);
+	
 
 			
 			
@@ -236,6 +240,14 @@ void mainRender()
 				entity_draw(g_Entities[a], g_viewpos2, c_ScreenW + separation);
 		}
 
+		
+		if (numFootContacts1 > 0) doubleJump1 =0;
+		if (numFootContacts2 > 0) doubleJump2 = 0;
+
+		if ((now - tmSound) > 180000){
+			play_sound("theme.wav");
+			tmSound = now;
+		}
 		
 		
 		// -> draw physics debug layer
@@ -260,7 +272,7 @@ void mainRender()
 	else if (g_State == end_of_the_game)
 	{
 
-		if (!g_Keys['r'])
+		if (!g_Keys['r'] || !g_Keys['q'])
 		{
 			clearScreen();
 			background_draw2(g_EndBkg, g_EndBkg->pos, v2i(0, 0));
@@ -272,7 +284,7 @@ void mainRender()
 						
 		}
 
-		else 
+		if (g_Keys['r'])
 		{
 			numFootContacts1 = 0;
 			numLeftContacts1 = 0;
@@ -281,18 +293,18 @@ void mainRender()
 			numLeftContacts2 = 0;
 			numRightContacts2 = 0;
 
-			for (int i = 0; i < 12; i++){
+			for (int i = 0; i < 8; i++){
 				twelve[i] = -1;
 			}
 
 			{
 				i = 0;
 				r = 0;
-				while (i < 12){
-					r = rand() % 12;
+				while (i < 8){
+					r = rand() % 8;
 					isInArray = std::find(std::begin(twelve), std::end(twelve), r) != std::end(twelve);
 					while (isInArray){
-						r = rand() % 12;
+						r = rand() % 8;
 						isInArray = std::find(std::begin(twelve), std::end(twelve), r) != std::end(twelve);
 					}
 					twelve[i] = r;
@@ -300,18 +312,18 @@ void mainRender()
 				}
 			}
 
-			for (int i = 0; i < 26; i++){
+			for (int i = 0; i < 12; i++){
 				five[i] = -1;
 			}
 
 			{
 				i = 0;
 				r = 0;
-				while (i < 26){
-					r = rand() % 26;
+				while (i < 12){
+					r = rand() % 12;
 					isInArray = std::find(std::begin(five), std::end(five), r) != std::end(five);
 					while (isInArray){
-						r = rand() % 26;
+						r = rand() % 12;
 						isInArray = std::find(std::begin(five), std::end(five), r) != std::end(five);
 					}
 					five[i] = r;
@@ -452,23 +464,44 @@ void mainRender()
 		}
 
 		{
-			for (int i = 0; i < 4; i++){
+			for (int i = 0; i < 2; i++){
 				Entity *c = entity_create(to_string(i), -1, "gemme.lua");
-				entity_set_pos(c, g_Gems2[twelve[c->nbOfDiamonds + 3 * i]]);
+				entity_set_pos(c, g_Gems2[twelve[c->nbOfDiamonds + 4 * i]]);
 				g_Entities.push_back(c);
 
 			}
 		}
 
-		whereIsDiamond0 = g_Entities.size() - 4;
-		whereIsDiamond1 = g_Entities.size() - 3;
-		whereIsDiamond2 = g_Entities.size() - 2;
-		whereIsDiamond3 = g_Entities.size() - 1;
+		whereIsDiamond0 = g_Entities.size() - 2;
+		whereIsDiamond1 = g_Entities.size() - 1;
+
+		{
+			for (int i = 0; i < 2; i++){
+				Entity* c = entity_create("ball", 2, ball);
+				entity_set_pos(c, v2f(-100, -100));
+				g_Entities.push_back(c);
+			}
+		}
+
+		whereIsBall0 = g_Entities.size() - 2;
+		whereIsBall1 = g_Entities.size() - 1;
+
+
 
 			g_State = playing;
 
 		}
+		
+		if (g_Keys['q']){
+			
+			SimpleUI::shutdown();
+			exit(0);
+		}
+
+
 	}
+
+	
 
 
 }
@@ -592,11 +625,11 @@ int main(int argc, const char **argv)
 		{
 			i = 0;
 			r = 0;
-			while (i < 12){
-				r = rand() % 12;
+			while (i < 8){
+				r = rand() % 8;
 				isInArray = std::find(std::begin(twelve), std::end(twelve), r) != std::end(twelve);
 				while (isInArray){
-					r = rand() % 12;
+					r = rand() % 8;
 					isInArray = std::find(std::begin(twelve), std::end(twelve), r) != std::end(twelve);
 				}
 				twelve[i] = r;
@@ -605,18 +638,16 @@ int main(int argc, const char **argv)
 		}
 
 		{
-			for (int i = 0; i < 4; i++){
+			for (int i = 0; i < 2; i++){
 				Entity *c = entity_create(to_string(i), -1, "gemme.lua");
-				entity_set_pos(c, g_Gems2[twelve[c->nbOfDiamonds + 3 * i]]);
+				entity_set_pos(c, g_Gems2[twelve[c->nbOfDiamonds + 4 * i]]);
 				g_Entities.push_back(c);
 
 			}
 		}
 
-		whereIsDiamond0 = g_Entities.size() - 4;
-		whereIsDiamond1 = g_Entities.size() - 3;
-		whereIsDiamond2 = g_Entities.size() - 2;
-		whereIsDiamond3 = g_Entities.size() - 1;
+		whereIsDiamond0 = g_Entities.size() - 2;
+		whereIsDiamond1 = g_Entities.size() - 1;
 
 
 		  {
@@ -629,13 +660,13 @@ int main(int argc, const char **argv)
 				}
 
 				else if (g_Ennemies[i][2] == 1){
-					Entity *c = entity_create(to_string(i), 2, "crabs.lua");
+					Entity *c = entity_create("crabs", 2, "crabs.lua");
 					entity_set_pos(c, v2f(g_Ennemies[i][0], g_Ennemies[i][1]));
 					g_Entities.push_back(c);
 				} 
 				
 				else if (g_Ennemies[i][2] == 0){
-					Entity *c = entity_create(to_string(i), 2, "ennemy_fly.lua");
+					Entity *c = entity_create("fly", 2, "ennemy_fly.lua");
 					entity_set_pos(c, v2f(g_Ennemies[i][0], g_Ennemies[i][1]));
 					g_Entities.push_back(c);
 				}
@@ -673,11 +704,11 @@ int main(int argc, const char **argv)
 		{
 			i = 0;
 			r = 0;
-			while (i < 26){
-				r = rand() % 26;
+			while (i < 12){
+				r = rand() % 12;
 				isInArray = std::find(std::begin(five), std::end(five), r) != std::end(five);
 				while (isInArray){
-					r = rand() % 26;
+					r = rand() % 12;
 					isInArray = std::find(std::begin(five), std::end(five), r) != std::end(five);
 				}
 				five[i] = r;
@@ -692,6 +723,17 @@ int main(int argc, const char **argv)
 			g_Entities.push_back(c);
 			whereIsTheStar = g_Entities.size() - 1;
 		}
+
+		{
+			for (int i = 0; i < 2; i++){
+				Entity* c = entity_create("ball", 2, ball);
+				entity_set_pos(c, v2f(-100, -100));
+				g_Entities.push_back(c);
+			}
+		}
+
+		whereIsBall0 = g_Entities.size() - 2;
+		whereIsBall1 = g_Entities.size() - 1;
 
 
 		g_LastFrame = milliseconds();

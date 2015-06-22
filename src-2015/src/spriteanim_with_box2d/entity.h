@@ -44,11 +44,15 @@ typedef struct
   bool                     killingContact;
   bool                     winningContact;
   bool                     gemContact;
+  bool                     isMoving;
+  bool                     isFaster;
+  bool                     isSlower;
   int                      killer;
   int                      life;
   int                      score;
   int                      movement;
   int                      evolution;
+  int                      evolution2;
   int                      nbOfStars;
   int                      nbOfDiamonds;
   v2f                      initialCoordinates;
