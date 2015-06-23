@@ -18,13 +18,13 @@ function step()
 
 
 
-    if evolution < 280 then
-		set_velocity_x(2)
+    if evolution < 350 then
+		set_velocity_x(1.5)
     else
-	    set_velocity_x(-2)
+	    set_velocity_x(-1.5)
     end
 	evolution = evolution + 1
-	if evolution == 560 then
+	if evolution == 630 then
 		evolution = 0
     end
 
@@ -34,13 +34,13 @@ function contact(with)
 end
 
 function onAnimEnd()
-    if evolution < 200 then
+    if evolution < 350 then
 
 			playanim('Monster_met_D.png',false) 
 
 
 
-    elseif evolution >= 200 then
+    elseif evolution >= 350 then
 
 			playanim('Monster_met_G.png',false) 
 

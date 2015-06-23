@@ -12,7 +12,7 @@ tile(color(0,0,255), 'area01_level_tiles.png', 176,0, 32,32 )
 
 -- load tile map
 chosenMap = math.random(0,3)
-tilemap('map' .. chosenMap .. '.png',16,16)
+tilemap('map'.. chosenMap .. '.png',16,16)
 
 -- automatically add borders
 for j=0,num_tiles_y()-1 do

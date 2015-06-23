@@ -13,7 +13,7 @@ function step()
 if movement == 3 then
     if evolution < 50 then
 		set_velocity_y(0)
-		set_velocity_x(-3)
+		set_velocity_x(-2)
     elseif evolution > 10 then 
 		life = 0
     end
@@ -22,9 +22,9 @@ if movement == 3 then
 end
 
 if movement == 4 then
-    if evolution < 60 then
+    if evolution < 50 then
 		set_velocity_y(0)
-		set_velocity_x(6)
+		set_velocity_x(2)
     elseif evolution > 10 then 
 		life = 0
     end

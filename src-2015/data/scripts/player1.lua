@@ -38,7 +38,7 @@ function step()
 	    state = 'turn_left'
 	    playanim('retournement.png',false)
 	  end
-    elseif Key_d then
+    elseif Key_e then
 	  if state == 'wait_right' then 
 	    -- already in the correct orientation, just walk!
 	    state = 'walk_right'
@@ -54,7 +54,7 @@ function step()
 	  state = 'wait_left'
 	  playanim('waitspritegauche.png',false)
 	  stopanim()
-    elseif not Key_d and state == 'walk_right' then
+    elseif not Key_e and state == 'walk_right' then
 	  state = 'wait_right'
 	  playanim('waitspritedroite.png',false)
 	  stopanim()
@@ -82,15 +82,15 @@ function step()
   end	 
 
 
-  if Key_v and Key_d then
+  if Key_x and Key_e then
     set_jump(0,3.3,1.5,3.5,0,0)
 
 
-  elseif Key_v and Key_a then
+  elseif Key_x and Key_a then
 
     set_jump(0,3.3,0,0,-1.5,3.5)
 
-  elseif Key_v then
+  elseif Key_x then
   	set_jump(0,3.3,0,0,0,0)
   end
 

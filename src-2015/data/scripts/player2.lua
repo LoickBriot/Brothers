@@ -27,7 +27,7 @@ function step()
 
   -- update state
   if state == 'wait_left' or state == 'wait_right' then
-    if Key_k then
+    if Key_u then
 	  if state == 'wait_left' then 
 	    -- already in the correct orientation, just walk!
 	    state = 'walk_left'
@@ -37,7 +37,7 @@ function step()
 	    state = 'turn_left'
 	    playanim('retournement.png',false)
 	  end
-    elseif Key_p then
+    elseif Key_o then
 	  if state == 'wait_right' then 
 	    -- already in the correct orientation, just walk!
 	    state = 'walk_right'
@@ -49,18 +49,18 @@ function step()
 	  end
 	end
   else
-    if not Key_k and state == 'walk_left' then
+    if not Key_u and state == 'walk_left' then
 	  state = 'wait_left'
 	  playanim('waitspritegauche.png',false)
 	  stopanim()
-    elseif not Key_p and state == 'walk_right' then
+    elseif not Key_o and state == 'walk_right' then
 	  state = 'wait_right'
 	  playanim('waitspritedroite.png',false)
 	  stopanim()
 	end
   end
 
-  if Key_l then
+  if Key_i then
     if fireball == 'true' then
 		if state == 'walk_left' or state == 'turn_left' or state == 'wait_left' then
 			attack(1, pos_x, pos_y, 0)
@@ -81,11 +81,11 @@ function step()
   end	
 
 
-  if Key_n and Key_p then
+  if Key_n and Key_o then
     set_jump(0,3.3,1.5,3.5,0,0)
 
 
-  elseif Key_n and Key_k then
+  elseif Key_n and Key_u then
 
     set_jump(0,3.3,0,0,-1.5,3.5)
 
