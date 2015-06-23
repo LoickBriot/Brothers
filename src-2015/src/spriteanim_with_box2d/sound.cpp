@@ -47,7 +47,7 @@ ALuint LoadSound(const std::string& Filename)
 
 
 ALuint Source;
-list <string> sounds_src = {"boing.wav", "saut.wav", "1-up.wav", "theme.wav"};
+list <string> sounds_src = { "boing.wav", "saut.wav", "1-up.wav", "theme.wav", "629681_-FlyBoyampGabberGir.wav", "629975_Power-Play.wav", "630254_Corriamo.wav", "630325_100-Miles.wav", "630320_Roys-Our-Boy-Smash-.wav", "630701_Mega-Man-Battle-Net.wav" };
 map < string , ALuint > sounds ;
 
 

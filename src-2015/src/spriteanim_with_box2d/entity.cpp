@@ -32,6 +32,9 @@ extern DrawImage      *i_1Score;
 extern DrawImage      *i_2Score;
 extern DrawImage      *i_3Score;
 
+extern int doubleJump1;
+extern int doubleJump2;
+
 
 // ------------------------------------------------------------------
 
@@ -141,59 +144,55 @@ void lua_set_impulse(float ix, float iy)
 	g_Current->body->ApplyLinearImpulse(g_Current->body->GetMass()* b2Vec2(ix, iy), g_Current->body->GetWorldCenter());
 }
 
-extern int doubleJump1;
-extern int doubleJump2;
-
 void lua_set_jump(float ix_foot, float iy_foot, float ix_left, float iy_left, float ix_right, float iy_right){
 	
 	std::cerr << Console::red << doubleJump1 << Console::gray << std::endl;
-		static t_time tmJump1 = milliseconds();
-		static t_time tmJump2 = milliseconds();
-		t_time now = milliseconds();
-		if ((g_Current->name == "player1" && (now - tmJump1) > 200) || (g_Current->name == "player2" && (now - tmJump2) > 200)) {
-			if ((g_Current->name == "player1"  && numLeftContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numLeftContacts2 > 0 && numFootContacts2 == 0))
-			{
-				lua_set_velocity_x(ix_left);
-				lua_set_velocity_y(iy_left);
-				if (g_Current->name == "player1") doubleJump1=2;
-				if (g_Current->name == "player2") doubleJump2=2;
-
-			}
-			else if ((g_Current->name == "player1" && numRightContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numRightContacts2 > 0 && numFootContacts2 == 0))
-			{
-				lua_set_velocity_x(ix_right);
-				lua_set_velocity_y(iy_right);
-				if (g_Current->name == "player1") doubleJump1 = 2;
-				if (g_Current->name == "player2") doubleJump2 = 2;
-			}
-			
-
-			else if ((g_Current->name == "player1"  && doubleJump1 < 2) || (g_Current->name == "player2"  && doubleJump2++ < 2)){
-
-				if (g_Current->name == "player1" && doubleJump1 == 0) {
-					doubleJump1++;
-					lua_set_velocity_y(iy_foot);
-				}
-				else if (g_Current->name == "player1" && doubleJump1 == 1 ){
-					doubleJump1++;
-					lua_set_velocity_y(iy_foot / 4.0);
-				}
-				else if (g_Current->name == "player2" && doubleJump2 == 0){
-					doubleJump2++;
-					lua_set_velocity_y(iy_foot);
-				}
-				else if (g_Current->name == "player2" && doubleJump2 == 1){
-					doubleJump2++;
-					lua_set_velocity_y(iy_foot / 4.0);
-				}
-				
-
-			}
-			if (g_Current->name == "player1") tmJump1 = now;
-			if (g_Current->name == "player2") tmJump2 = now; 
+	static t_time tmJump1 = milliseconds();
+	static t_time tmJump2 = milliseconds();
+	t_time now = milliseconds();
+	if ((g_Current->name == "player1" && (now - tmJump1) > 200) || (g_Current->name == "player2" && (now - tmJump2) > 200)) {
+		if ((g_Current->name == "player1"  && numLeftContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numLeftContacts2 > 0 && numFootContacts2 == 0))
+		{
+			lua_set_velocity_x(ix_left);
+			lua_set_velocity_y(iy_left);
+			if (g_Current->name == "player1") doubleJump1 = 2;
+			if (g_Current->name == "player2") doubleJump2 = 2;
 
 		}
-	
+		else if ((g_Current->name == "player1" && numRightContacts1 > 0 && numFootContacts1 == 0) || (g_Current->name == "player2" && numRightContacts2 > 0 && numFootContacts2 == 0))
+		{
+			lua_set_velocity_x(ix_right);
+			lua_set_velocity_y(iy_right);
+			if (g_Current->name == "player1") doubleJump1 = 2;
+			if (g_Current->name == "player2") doubleJump2 = 2;
+		}
+
+
+		else if ((g_Current->name == "player1"  && doubleJump1 < 2) || (g_Current->name == "player2"  && doubleJump2 < 2)){
+
+			if (g_Current->name == "player1" && doubleJump1 == 0) {
+				doubleJump1++;
+				lua_set_velocity_y(iy_foot);
+			}
+			else if (g_Current->name == "player1" && doubleJump1 == 1){
+				doubleJump1++;
+				lua_set_velocity_y(iy_foot / 4.0);
+			}
+			else if (g_Current->name == "player2" && doubleJump2 == 0){
+				doubleJump2++;
+				lua_set_velocity_y(iy_foot);
+			}
+			else if (g_Current->name == "player2" && doubleJump2 == 1){
+				doubleJump2++;
+				lua_set_velocity_y(iy_foot / 4.0);
+			}
+
+
+		}
+		if (g_Current->name == "player1") tmJump1 = now;
+		if (g_Current->name == "player2") tmJump2 = now;
+
+	}
 }
 
 void lua_set_walk(float ix_vel, float ix_jmp){
@@ -596,11 +595,12 @@ void    entity_draw(Entity *e, v2i viewpos, int decallage)
 		return;
 	}
 	if (e->isMoving == false && e->name == "ball"){
-		entity_set_pos(e, v2f(-100, -100));
+		entity_set_pos(e, v2f(-1000, -1000));
 	}
 
 	if (e->gemContact == true){
 		int effect = rand() % 100;
+		std::cerr << Console::red << effect << Console::gray << endl;
 		
 		if (effect < 25){
 			if (e->name == "player1"){
@@ -614,13 +614,14 @@ void    entity_draw(Entity *e, v2i viewpos, int decallage)
 			entity_set_pos(g_Entities[0], g_Entities[0]->initialCoordinates);
 		}
 		
-	  if (effect >= 50 && effect < 75){
+	    else if (effect >= 50 && effect < 75){
 			int character = rand() % 1;
 			g_Entities[character]->evolution2 = 0;
 			g_Entities[character]->isSlower = false;
 			g_Entities[character]->isFaster = true;
 	  }
-	  else{
+	  else if (effect >= 75){
+		  std::cerr << Console::red << "else " + effect << Console::gray << endl;
 		  int character = rand() % 1;
 		  g_Entities[character]->evolution2 = 0;
 		  g_Entities[character]->isFaster = false;
